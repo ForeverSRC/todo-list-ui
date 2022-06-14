@@ -3,13 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev": "vue-cli-service serve --mode local",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.0.5",
     "core-js": "^3.6.5",
-    "vue": "^3.0.0"
+    "element-plus": "2.2.5",
+    "vue": "3.2.37",
+    "md-editor-v3": "2.1.1",
+    "axios": "0.27.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.13",
