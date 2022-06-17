@@ -48,8 +48,8 @@ export default {
 </script>
 
 <script setup>
-import Item from "@/components/Item"
-import ItemForm from "@/components/ItemForm";
+import Item from "@/components/item/Item"
+import ItemForm from "@/components/item/ItemForm";
 import {computed, onMounted, reactive} from "vue";
 import {Plus} from '@element-plus/icons-vue'
 import {getItemList} from "@/api/item";

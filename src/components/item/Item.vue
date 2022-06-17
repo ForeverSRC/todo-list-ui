@@ -2,7 +2,7 @@
   <el-card shadow="always" @click="showDetail" class="item-card">
     <div>
       <el-row>
-        <el-col :xs="12" :sm="14" :md="18" :lg="19" :xl="21" :offset="1">
+        <el-col :xs="12" :sm="14" :md="18" :lg="19" :xl="19" :offset="1">
           <span class="item-title" :class="item.state===ItemStateFinished?'item-title-style-finished':''">
             <el-icon color="#E6A23C" v-show="item.state===ItemStateUnFinished" style="vertical-align: top" :size="25">
               <Aim />
@@ -13,7 +13,7 @@
             {{ item.title }}
           </span>
         </el-col>
-        <el-col :xs="11" :sm="9" :md="5" :lg="4" :xl="3">
+        <el-col :xs="11" :sm="9" :md="5" :lg="4" :xl="4">
           <el-button type="success" :icon="Check" circle
                      v-if="item.state===ItemStateUnFinished" @click.stop="onFinishItem" />
           <el-button type="warning" :icon="RefreshRight" circle
