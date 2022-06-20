@@ -23,6 +23,12 @@ export const routes = [
         path: "create",
         name: "mission-create",
         component: () => import("@/view/MissionCreate")
-      }]
+      },
+      {
+        path: ":mid",
+        name: "mission-detail",
+        component: () => import("@/view/MissionDetail")
+      }
+    ]
   },
 ]

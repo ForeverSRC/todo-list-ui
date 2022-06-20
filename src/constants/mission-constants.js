@@ -1,22 +1,27 @@
-export const PriorityMap={
-  "P1":{
-    value:1,
-    type:'danger',
+export const PriorityMap = {
+  1: {
+    label: "P1",
+    value: 1,
+    type: 'danger',
   },
-  "P2":{
-    value:2,
-    type:'danger',
+  2: {
+    label: "P2",
+    value: 2,
+    type: 'danger',
   },
-  "P3":{
-    value:3,
-    type:'warning',
+  3: {
+    label: "P3",
+    value: 3,
+    type: 'warning',
   },
-  "P4":{
-    value:4,
-    type:'success',
+  4: {
+    label: "P4",
+    value: 4,
+    type: 'success',
   },
-  "P99":{
-    value:99,
-    type:'info',
+  99: {
+    label: "P99",
+    value: 99,
+    type: 'info',
   },
 }

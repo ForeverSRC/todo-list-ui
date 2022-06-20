@@ -1,5 +1,5 @@
 <template>
-  <router-view />
+  <router-view style="height: 95vh"/>
   <van-tabbar route>
     <van-tabbar-item name="items" :to="{name:'item-page'}" style="border-right: #F0F2F5 solid">
       <template #icon>

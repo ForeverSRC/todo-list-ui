@@ -9,3 +9,11 @@ export function getMissions(query) {
     params: query
   })
 }
+
+export function getMission(id){
+  return axiosInstance.get(`/api/missions/${id}`)
+}
+
+export function updateMission(id,data){
+  return axiosInstance.put(`/api/missions/${id}`,data)
+}

@@ -8,10 +8,10 @@
         <el-option
             v-for="(v,k) in PriorityMap"
             :key="k"
-            :label="k"
+            :label="v.label"
             :value="v.value"
         >
-          <el-tag :type="v.type">{{ k }}</el-tag>
+          <el-tag :type="v.type" round effect="dark">{{ v.label }}</el-tag>
         </el-option>
       </el-select>
     </el-form-item>
@@ -59,7 +59,7 @@ function onCreateMission() {
   state.confirmBtnDisable = true
   createMission(model.mission).then(() => {
     router.push({name: 'mission-page'})
-  }).catch(()=>{
+  }).catch(() => {
     state.confirmBtnDisable = false
   })
 }
