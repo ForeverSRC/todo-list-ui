@@ -1,5 +1,5 @@
 <template>
-  <ItemList></ItemList>
+  <Layout/>
 </template>
 
 <script>
@@ -9,7 +9,7 @@ export default {
 </script>
 
 <script setup>
-import ItemList from "@/view/ItemList";
+import Layout from "@/layout/Layout";
 </script>
 
 <style>

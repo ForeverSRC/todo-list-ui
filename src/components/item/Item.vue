@@ -1,9 +1,9 @@
 <template>
-  <el-card shadow="always" @click="showDetail" class="item-card">
+  <el-card shadow="always"  class="item-card" @click.stop="showDetail">
     <div>
       <el-row>
-        <el-col :xs="12" :sm="14" :md="18" :lg="19" :xl="21" :offset="1">
-          <span class="item-title" :class="item.state===ItemStateFinished?'item-title-style-finished':''">
+        <el-col :xs="12" :sm="14" :md="18" :lg="19" :xl="19" :offset="1">
+          <span class="item-title" :class="item.state===ItemStateFinished?'item-title-style-finished':''" >
             <el-icon color="#E6A23C" v-show="item.state===ItemStateUnFinished" style="vertical-align: top" :size="25">
               <Aim />
             </el-icon>
@@ -13,13 +13,11 @@
             {{ item.title }}
           </span>
         </el-col>
-        <el-col :xs="11" :sm="9" :md="5" :lg="4" :xl="3">
+        <el-col :xs="11" :sm="9" :md="5" :lg="4" :xl="4">
           <el-button type="success" :icon="Check" circle
                      v-if="item.state===ItemStateUnFinished" @click.stop="onFinishItem" />
           <el-button type="warning" :icon="RefreshRight" circle
                      v-if="item.state===ItemStateFinished" @click.stop="onResetItem" />
-          <el-button type="primary" :icon="Edit" circle
-                     v-if="item.state===ItemStateUnFinished" @click.stop="onEditItem" />
           <el-button type="danger" :icon="Delete" circle @click.stop="onDeleteItem" />
         </el-col>
       </el-row>
@@ -27,10 +25,11 @@
     <el-collapse-transition>
       <div v-show="state.detailVisible" style="border-radius: 3px">
         <el-divider />
-        <md-editor v-if="!state.editable" :modelValue="item.description" previewOnly class="item-detail-style" />
-        <div v-if="state.editable" @click.stop>
-          <md-editor v-if="state.editable" v-model="model.item.description" :toolbars="toolbars" />
-          <el-button type="primary" @click.stop="confirmEditItem" :disabled="!state.editable">确认</el-button>
+        <div @dblclick.stop="onEditItem" @click.stop>
+          <md-editor v-if="!itemEditable" :modelValue="item.description" previewOnly class="item-detail-style" />
+          <md-editor v-if="itemEditable" v-model="model.item.description" :toolbars="toolbars" />
+          <el-button v-if="itemEditable" type="primary" @click.stop="confirmEditItem" :disabled="!itemEditable">确认</el-button>
+          <el-button v-if="itemEditable" type="success" @click.stop="state.editable=false" >取消</el-button>
         </div>
         <el-divider />
         <el-descriptions :column="2">
@@ -58,8 +57,8 @@ export default {
 </script>
 
 <script setup>
-import {Check, Edit, Delete, Aim, CircleCheck, RefreshRight} from '@element-plus/icons-vue'
-import {reactive, defineProps, defineEmits} from "vue";
+import {Check, Delete, Aim, CircleCheck, RefreshRight} from '@element-plus/icons-vue'
+import {reactive, defineProps, defineEmits, computed} from "vue";
 import {ElCollapseTransition} from 'element-plus'
 import {deleteItem, editItem, finishItem, resetItem} from "@/api/item";
 import {ItemStateUnFinished, ItemStateFinished} from "@/constants/item-constants";
@@ -80,6 +79,8 @@ const state = reactive({
   editable: false
 })
 
+const itemEditable = computed(() => props.item.state === ItemStateUnFinished && state.editable)
+
 const model = reactive({
   item: {
     description: props.item.description
@@ -88,6 +89,9 @@ const model = reactive({
 
 function showDetail() {
   state.detailVisible = !state.detailVisible
+  if (state.detailVisible === false) {
+    state.editable = false
+  }
 }
 
 function onDeleteItem() {

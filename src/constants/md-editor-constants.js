@@ -20,8 +20,7 @@ export const toolbars = [
   '-',
   'revoke',
   'next',
-  '-',
+  '=',
   'pageFullscreen',
-  'fullScreen',
-  'preview'
+  'preview',
 ];

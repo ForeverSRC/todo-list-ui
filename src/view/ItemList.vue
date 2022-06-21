@@ -5,28 +5,57 @@
     </el-header>
 
     <el-main>
+      <el-divider content-position="right">
+        <el-button type="primary" circle :icon="Plus" @click="state.createVisible=!state.createVisible" />
+        <el-button type="success" circle :icon="RefreshRight" @click="refresh" />
+      </el-divider>
       <el-tabs type="border-card" v-model="state.tabActiveName" @tab-change="onListTabChange">
         <el-tab-pane label="全部" name="total">
-          <div v-for="(item,index) in model.items" :key="`total-${index}`">
-            <Item :item="item" @itemChanged="onListTabChange(state.tabActiveName)" />
+          <div style="overflow: auto;height: 70vh;padding: 5px">
+            <ul v-infinite-scroll="getItems" :infinite-scroll-disabled="disabled" :infinite-scroll-delay="400">
+              <li v-for="(item,index) in model.items" :key="`total-${index}`">
+                <Item :item="item" @itemChanged="refresh" />
+              </li>
+            </ul>
+            <el-divider>
+              <el-icon >
+                <Loading v-if="state.loading" />
+                <List v-if="state.noMore" />
+              </el-icon>
+            </el-divider>
           </div>
         </el-tab-pane>
         <el-tab-pane label="待办" name="todo">
-          <div v-for="(item,index) in model.items" :key="`todo-${index}`">
-            <Item :item="item" @itemChanged="onListTabChange(state.tabActiveName)" />
+          <div style="overflow: auto;height: 80vh;padding: 5px">
+            <ul v-infinite-scroll="getItems" :infinite-scroll-disabled="disabled" :infinite-scroll-delay="400">
+              <li v-for="(item,index) in model.items" :key="`todo-${index}`">
+                <Item :item="item" @itemChanged="refresh" />
+              </li>
+            </ul>
+            <el-divider>
+              <el-icon >
+                <Loading v-if="state.loading" />
+                <List v-if="state.noMore" />
+              </el-icon>
+            </el-divider>
           </div>
         </el-tab-pane>
         <el-tab-pane label="已完成" name="finished">
-          <div v-for="(item,index) in model.items" :key="`finished-${index}`">
-            <Item :item="item" />
+          <div style="overflow: auto;height: 80vh;padding: 5px">
+            <ul v-infinite-scroll="getItems" :infinite-scroll-disabled="disabled" :infinite-scroll-delay="400">
+              <li v-for="(item,index) in model.items" :key="`finished-${index}`">
+                <Item :item="item" @itemChanged="refresh" />
+              </li>
+            </ul>
+            <el-divider>
+              <el-icon >
+                <Loading v-if="state.loading" />
+                <List v-if="state.noMore" />
+              </el-icon>
+            </el-divider>
           </div>
         </el-tab-pane>
-
-        <el-divider>
-          <el-button type="primary" circle :icon="Plus" @click="state.createVisible=!state.createVisible"></el-button>
-        </el-divider>
       </el-tabs>
-
     </el-main>
   </el-container>
 
@@ -48,10 +77,10 @@ export default {
 </script>
 
 <script setup>
-import Item from "@/components/Item"
-import ItemForm from "@/components/ItemForm";
-import {computed, onMounted, reactive} from "vue";
-import {Plus} from '@element-plus/icons-vue'
+import Item from "@/components/item/Item"
+import ItemForm from "@/components/item/ItemForm";
+import {computed, reactive} from "vue";
+import {Plus, RefreshRight, Loading, List} from '@element-plus/icons-vue'
 import {getItemList} from "@/api/item";
 
 const stateMap = {
@@ -66,14 +95,17 @@ const model = reactive({
     state: 1,
     page: 1,
     pageSize: 5
-
   }
 })
 
 const state = reactive({
   createVisible: false,
-  tabActiveName: "total"
+  tabActiveName: "total",
+  loading: false,
+  noMore: false
 })
+
+const disabled = computed(() => state.loading || state.noMore)
 
 const size = computed(() => {
   return 4 * window.innerHeight.valueOf() / 5
@@ -81,20 +113,36 @@ const size = computed(() => {
 
 function onListTabChange(name) {
   state.tabActiveName = name
-  model.itemQuery.state = stateMap[name]
+  refresh()
+}
+
+function refresh() {
+  model.items = []
+  model.itemQuery.page = 1
+  state.noMore = false
+  getItems()
+}
+
+function getItems() {
+  state.loading = true
+  model.itemQuery.state = stateMap[state.tabActiveName]
   getItemList(model.itemQuery).then((resp) => {
-    model.items = resp.data.items
+    state.noMore = resp.data.noMore
+    model.items.push(...resp.data.items)
+    model.itemQuery.page++
+    state.loading = false
+  }).catch(() => {
+    state.noMore = true
+    state.loading = false
   })
 }
 
-onMounted(() => {
-  onListTabChange(state.tabActiveName)
-})
-
 function onCreateFinish() {
   state.createVisible = false
-  onListTabChange("todo")
+  state.tabActiveName = "todo"
 }
+
+
 </script>
 
 <style scoped>
