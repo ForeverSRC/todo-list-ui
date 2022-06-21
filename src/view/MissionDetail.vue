@@ -33,6 +33,11 @@
               </el-option>
             </el-select>
           </el-descriptions-item>
+          <el-descriptions-item label="完成进度">
+            <el-progress :text-inside="true" :percentage="missionProgress" :stroke-width="20" style="text-align: center">
+              <span >{{model.mission.finishedItems}}/{{model.mission.totalItems}}</span>
+            </el-progress>
+          </el-descriptions-item>
           <el-descriptions-item label="创建时间">
             {{ model.mission.createTime }}
           </el-descriptions-item>
@@ -65,7 +70,7 @@
             </li>
           </ul>
           <el-divider>
-            <el-button circle :icon="Plus" type="primary" />
+            <el-button circle :icon="Plus" type="primary" @click="state.itemAddVisible=true" />
           </el-divider>
 
         </div>
@@ -74,7 +79,39 @@
     </el-skeleton>
 
   </el-card>
-
+  <el-drawer v-model="state.itemAddVisible" direction="btt" :size="drawerSize">
+    <template #header>
+      <h1>添加事项</h1>
+    </template>
+    <div>
+      <el-radio-group v-model="model.addItemReq.addType">
+        <el-radio :label="1">添加现有未完成事项</el-radio>
+        <el-radio :label="2">创建新事项</el-radio>
+      </el-radio-group>
+      <el-divider />
+      <el-select v-model="model.addItemReq.itemId"
+                 v-show="model.addItemReq.addType===1"
+                 @visible-change="getUnfinishedItemList"
+                 no-data-text="无待办事项"
+                 placeholder="请选择待办事项"
+                 clearable>
+        <el-option v-for="(item,index) in model.unfinishedItems"
+                   :key="`ui-${index}`"
+                   :label="item.title"
+                   :value="item.id" />
+      </el-select>
+      <el-form :model="model.addItemReq.itemInfo" v-show="model.addItemReq.addType===2">
+        <el-form-item label="事项">
+          <el-input v-model="model.addItemReq.itemInfo.title" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <md-editor v-model="model.addItemReq.itemInfo.description" style="height: 50vh" :toolbars="toolbars" />
+        </el-form-item>
+      </el-form>
+      <el-divider />
+      <el-button type="primary" @click="addItemToMission">确认</el-button>
+    </div>
+  </el-drawer>
 </template>
 
 <script>
@@ -84,8 +121,8 @@ export default {
 </script>
 
 <script setup>
-import {onMounted, reactive} from "vue";
-import {getMission, updateMission} from "@/api/mission";
+import {onMounted, reactive, computed} from "vue";
+import {addItem, getMission, updateMission} from "@/api/mission";
 import {useRoute} from "vue-router";
 import MdEditor from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
@@ -93,6 +130,7 @@ import {PriorityMap} from "@/constants/mission-constants";
 import {Collection, Plus} from "@element-plus/icons-vue";
 import Item from "@/components/item/Item";
 import {toolbars} from "@/constants/md-editor-constants";
+import {getItemList} from "@/api/item";
 
 const route = useRoute()
 
@@ -102,12 +140,34 @@ const model = reactive({
     detail: "",
     priority: null,
     title: ""
+  },
+  unfinishedItems: [],
+  addItemReq: {
+    addType: 1,
+    itemId: "",
+    itemInfo: {
+      title: "",
+      description: ""
+    }
   }
 })
 
 const state = reactive({
   pageLoading: true,
-  missionEdit: false
+  missionEdit: false,
+  itemAddVisible: false,
+})
+
+const missionProgress = computed(() => {
+  if (model.mission.totalItems === 0) {
+    return 100
+  }
+
+  return 100 * model.mission.finishedItems / model.mission.totalItems
+})
+
+const drawerSize = computed(() => {
+  return 4 * window.innerHeight.valueOf() / 5
 })
 
 onMounted(() => {
@@ -117,7 +177,7 @@ onMounted(() => {
 function copyValue() {
   model.missionValue.detail = model.mission.detail
   model.missionValue.title = model.mission.title
-  model.missionValue.priority=model.mission.priority
+  model.missionValue.priority = model.mission.priority
 }
 
 const refresh = () => {
@@ -148,6 +208,44 @@ function updateMissionInfo() {
   updateMission(id, model.missionValue).then(() => {
     state.missionEdit = false
     refresh()
+  })
+}
+
+const getUnfinishedItemList = async (visible) => {
+  if (visible) {
+    let query = {
+      state: 1,
+      page: 1,
+      pageSize: 10
+    }
+    model.unfinishedItems = []
+    let noMore = false
+    while (!noMore) {
+      await getItemList(query).then(resp => {
+        model.unfinishedItems.push(...resp.data.items)
+        noMore = resp.data.noMore
+        query.page++
+      }).catch(() => {
+        noMore = true
+      })
+    }
+  }
+
+}
+
+function addItemToMission() {
+  let id = route.params.mid
+  let req = {
+    addType: model.addItemReq.addType
+  }
+  if (model.addItemReq.addType === 1) {
+    req.itemId = model.addItemReq.itemId
+  } else {
+    req.itemInfo = model.addItemReq.itemInfo
+  }
+  addItem(id, req).then(() => {
+    refresh()
+    state.itemAddVisible = false
   })
 }
 

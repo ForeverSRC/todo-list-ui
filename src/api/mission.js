@@ -17,3 +17,7 @@ export function getMission(id){
 export function updateMission(id,data){
   return axiosInstance.put(`/api/missions/${id}`,data)
 }
+
+export function addItem(id,data){
+  return axiosInstance.post(`/api/missions/${id}/items`,data)
+}

@@ -95,7 +95,6 @@ const model = reactive({
     state: 1,
     page: 1,
     pageSize: 5
-
   }
 })
 
